@@ -7,9 +7,7 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
         
-        /* Definizione delle Palette Colori (Variabili CSS) */
         :root {
-            /* Tema Default (Beige) */
             --th-bg: #F2EBE9;
             --th-text: #8C7A74;
             --td-bg: #FCFAFA;
@@ -66,11 +64,10 @@
             font-family: 'Poppins', sans-serif;
             color: var(--text-color);
             display: flex;
-            flex-direction: column; /* Impila gli elementi verticalmente */
+            flex-direction: column;
             align-items: center;
         }
 
-        /* Stile per i pallini selettori di colore */
         .theme-picker {
             display: flex;
             gap: 15px;
@@ -101,7 +98,6 @@
             border-spacing: 6px;
         }
 
-        /* Le transizioni rendono il cambio colore fluido */
         th, td {
             padding: 15px 10px;
             text-align: center;
@@ -150,11 +146,11 @@
 <body>
 
     <div class="theme-picker">
-        <div class="color-dot" style="background-color: #D4C5C1;" onclick="setTheme('default')" title="Beige"></div>
-        <div class="color-dot" style="background-color: #F8BBD0;" onclick="setTheme('pink')" title="Rosa"></div>
-        <div class="color-dot" style="background-color: #BBDEFB;" onclick="setTheme('blue')" title="Blu"></div>
-        <div class="color-dot" style="background-color: #E1BEE7;" onclick="setTheme('purple')" title="Viola"></div>
-        <div class="color-dot" style="background-color: #C8E6C9;" onclick="setTheme('green')" title="Verde"></div>
+        <div class="color-dot" style="background-color: #D4C5C1;" data-theme-target="default" title="Beige"></div>
+        <div class="color-dot" style="background-color: #F8BBD0;" data-theme-target="pink" title="Rosa"></div>
+        <div class="color-dot" style="background-color: #BBDEFB;" data-theme-target="blue" title="Blu"></div>
+        <div class="color-dot" style="background-color: #E1BEE7;" data-theme-target="purple" title="Viola"></div>
+        <div class="color-dot" style="background-color: #C8E6C9;" data-theme-target="green" title="Verde"></div>
     </div>
 
     <table>
@@ -198,3 +194,52 @@
                 <td contenteditable="true" id="cell-16"></td>
                 <td contenteditable="true" id="cell-17"></td>
                 <td contenteditable="true" id="cell-18"></td>
+                <td contenteditable="true" id="cell-19"></td>
+                <td contenteditable="true" id="cell-20"></td>
+            </tr>
+            <tr>
+                <td class="time-col" contenteditable="true" id="time-5"></td>
+                <td contenteditable="true" id="cell-21"></td>
+                <td contenteditable="true" id="cell-22"></td>
+                <td contenteditable="true" id="cell-23"></td>
+                <td contenteditable="true" id="cell-24"></td>
+                <td contenteditable="true" id="cell-25"></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <script>
+        // 1. GESTIONE DEL TEMA (COLORI)
+        function setTheme(themeName) {
+            document.documentElement.setAttribute('data-theme', themeName);
+            localStorage.setItem('timetable-theme', themeName);
+        }
+
+        // Imposta il tema al caricamento iniziale
+        const savedTheme = localStorage.getItem('timetable-theme') || 'default';
+        setTheme(savedTheme);
+
+        // Aggiunge la funzionalità del click ad ogni pallino colorato
+        const colorDots = document.querySelectorAll('.color-dot');
+        colorDots.forEach(dot => {
+            dot.addEventListener('click', () => {
+                const selectedTheme = dot.getAttribute('data-theme-target');
+                setTheme(selectedTheme);
+            });
+        });
+
+        // 2. GESTIONE DEL TESTO (ORARI E MATERIE)
+        const cells = document.querySelectorAll('td[contenteditable="true"]');
+        cells.forEach(cell => {
+            const savedText = localStorage.getItem(cell.id);
+            if (savedText) {
+                cell.innerText = savedText;
+            }
+            cell.addEventListener('input', () => {
+                localStorage.setItem(cell.id, cell.innerText);
+            });
+        });
+    </script>
+
+</body>
+</html>
