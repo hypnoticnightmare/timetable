@@ -3,75 +3,164 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aesthetic Timetable</title>
+    <title>Aesthetic Timetable Multi-Colore</title>
     <style>
-        /* Importiamo un font elegante da Google Fonts */
-        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
         
+        /* Definizione delle Palette Colori (Variabili CSS) */
+        :root {
+            /* Tema Default (Beige) */
+            --th-bg: #F2EBE9;
+            --th-text: #8C7A74;
+            --td-bg: #FCFAFA;
+            --td-border: #F2EBE9;
+            --time-bg: #FAF4F2;
+            --focus-border: #D4C5C1;
+            --text-color: #5c5552;
+        }
+
+        [data-theme="pink"] {
+            --th-bg: #FCE4EC;
+            --th-text: #880E4F;
+            --td-bg: #FFF3F8;
+            --td-border: #FCE4EC;
+            --time-bg: #FAEAEE;
+            --focus-border: #F8BBD0;
+            --text-color: #5C3A46;
+        }
+
+        [data-theme="blue"] {
+            --th-bg: #E3F2FD;
+            --th-text: #0D47A1;
+            --td-bg: #F5FAFF;
+            --td-border: #E3F2FD;
+            --time-bg: #EBF4FA;
+            --focus-border: #BBDEFB;
+            --text-color: #3A4B5C;
+        }
+
+        [data-theme="purple"] {
+            --th-bg: #F3E5F5;
+            --th-text: #4A148C;
+            --td-bg: #FAF5FB;
+            --td-border: #F3E5F5;
+            --time-bg: #F6EBF8;
+            --focus-border: #E1BEE7;
+            --text-color: #4A3A5C;
+        }
+
+        [data-theme="green"] {
+            --th-bg: #E8F5E9;
+            --th-text: #1B5E20;
+            --td-bg: #F4FBF5;
+            --td-border: #E8F5E9;
+            --time-bg: #EDF7EE;
+            --focus-border: #C8E6C9;
+            --text-color: #3A5C41;
+        }
+
         body, html {
             margin: 0;
             padding: 10px;
             background-color: transparent;
             font-family: 'Poppins', sans-serif;
-            color: #5c5552; /* Colore del testo grigio scuro/marrone */
+            color: var(--text-color);
             display: flex;
-            justify-content: center;
+            flex-direction: column; /* Impila gli elementi verticalmente */
+            align-items: center;
+        }
+
+        /* Stile per i pallini selettori di colore */
+        .theme-picker {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.4);
+            border-radius: 25px;
+        }
+
+        .color-dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+
+        .color-dot:hover {
+            transform: scale(1.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.15);
         }
 
         table {
             width: 100%;
-            max-width: 900px;
+            max-width: 1000px;
             border-collapse: separate;
-            border-spacing: 6px; /* Spazio tra le celle per l'effetto aesthetic */
+            border-spacing: 6px;
         }
 
+        /* Le transizioni rendono il cambio colore fluido */
         th, td {
             padding: 15px 10px;
             text-align: center;
-            border-radius: 12px; /* Angoli morbidamente arrotondati */
+            border-radius: 12px;
             font-size: 0.95rem;
+            transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
         }
 
-        /* Stile per i giorni della settimana (Intestazione) */
         th {
-            background-color: #F2EBE9; /* Beige pastello chiarissimo */
-            color: #8C7A74;
-            font-weight: 500;
+            background-color: var(--th-bg);
+            color: var(--th-text);
+            font-weight: 600;
             text-transform: uppercase;
             letter-spacing: 1px;
             font-size: 0.85rem;
         }
 
-        /* Stile per le caselle dove scriverai */
         td {
-            background-color: #FCFAFA; /* Quasi bianco */
-            border: 1px solid #F2EBE9;
+            background-color: var(--td-bg);
+            border: 1px solid var(--td-border);
             height: 50px;
-            outline: none; /* Rimuove il bordo blu brutto quando clicchi */
-            transition: all 0.3s ease;
+            outline: none;
             cursor: text;
         }
 
-        /* Effetto quando clicchi su una casella per scrivere */
+        .time-col {
+            background-color: var(--time-bg);
+            font-weight: 500;
+            color: var(--th-text);
+        }
+
         td:focus {
             background-color: #FFFFFF;
-            border-color: #D4C5C1;
+            border-color: var(--focus-border);
             box-shadow: 0 4px 10px rgba(0,0,0,0.03);
             transform: translateY(-1px);
         }
 
-        /* Testo segnaposto se la casella è vuota */
         td:empty:before {
             content: "-";
-            color: #D4C5C1;
+            opacity: 0.4;
+            color: var(--text-color);
         }
     </style>
 </head>
 <body>
 
+    <div class="theme-picker">
+        <div class="color-dot" style="background-color: #D4C5C1;" onclick="setTheme('default')" title="Beige"></div>
+        <div class="color-dot" style="background-color: #F8BBD0;" onclick="setTheme('pink')" title="Rosa"></div>
+        <div class="color-dot" style="background-color: #BBDEFB;" onclick="setTheme('blue')" title="Blu"></div>
+        <div class="color-dot" style="background-color: #E1BEE7;" onclick="setTheme('purple')" title="Viola"></div>
+        <div class="color-dot" style="background-color: #C8E6C9;" onclick="setTheme('green')" title="Verde"></div>
+    </div>
+
     <table>
         <thead>
             <tr>
+                <th>Orario</th>
                 <th>Lunedì</th>
                 <th>Martedì</th>
                 <th>Mercoledì</th>
@@ -81,6 +170,7 @@
         </thead>
         <tbody>
             <tr>
+                <td class="time-col" contenteditable="true" id="time-1"></td>
                 <td contenteditable="true" id="cell-1"></td>
                 <td contenteditable="true" id="cell-2"></td>
                 <td contenteditable="true" id="cell-3"></td>
@@ -88,6 +178,7 @@
                 <td contenteditable="true" id="cell-5"></td>
             </tr>
             <tr>
+                <td class="time-col" contenteditable="true" id="time-2"></td>
                 <td contenteditable="true" id="cell-6"></td>
                 <td contenteditable="true" id="cell-7"></td>
                 <td contenteditable="true" id="cell-8"></td>
@@ -95,6 +186,7 @@
                 <td contenteditable="true" id="cell-10"></td>
             </tr>
             <tr>
+                <td class="time-col" contenteditable="true" id="time-3"></td>
                 <td contenteditable="true" id="cell-11"></td>
                 <td contenteditable="true" id="cell-12"></td>
                 <td contenteditable="true" id="cell-13"></td>
@@ -102,34 +194,7 @@
                 <td contenteditable="true" id="cell-15"></td>
             </tr>
             <tr>
+                <td class="time-col" contenteditable="true" id="time-4"></td>
                 <td contenteditable="true" id="cell-16"></td>
                 <td contenteditable="true" id="cell-17"></td>
                 <td contenteditable="true" id="cell-18"></td>
-                <td contenteditable="true" id="cell-19"></td>
-                <td contenteditable="true" id="cell-20"></td>
-            </tr>
-        </tbody>
-    </table>
-
-    <script>
-        // Questa parte di codice si occupa di SALVARE ciò che scrivi
-
-        // Seleziona tutte le celle dove è permesso scrivere
-        const cells = document.querySelectorAll('td[contenteditable="true"]');
-
-        cells.forEach(cell => {
-            // 1. Quando carichi la pagina, recupera il testo salvato in precedenza
-            const savedText = localStorage.getItem(cell.id);
-            if (savedText) {
-                cell.innerText = savedText;
-            }
-
-            // 2. Ogni volta che digiti qualcosa, salvalo immediatamente nella memoria del browser
-            cell.addEventListener('input', () => {
-                localStorage.setItem(cell.id, cell.innerText);
-            });
-        });
-    </script>
-
-</body>
-</html>
