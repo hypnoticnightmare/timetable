@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Aesthetic Timetable Dinamica</title>
+    <title>Aesthetic Timetable</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
         
@@ -32,13 +32,13 @@
         }
 
         .controls-container {
-            display: flex; gap: clamp(10px, 2vw, 20px); margin-bottom: 15px;
+            display: flex; gap: clamp(8px, 1.5vw, 20px); margin-bottom: 15px;
             padding: clamp(5px, 1.5vw, 10px) clamp(10px, 3vw, 20px);
             background-color: var(--picker-bg); border-radius: 25px; align-items: center;
             flex-wrap: wrap; justify-content: center; transition: background-color 0.4s ease;
         }
 
-        .picker-group { display: flex; gap: clamp(5px, 1.5vw, 10px); align-items: center; }
+        .picker-group { display: flex; gap: clamp(4px, 1vw, 10px); align-items: center; }
         .picker-label { font-size: clamp(8px, 1.5vw, 12px); font-weight: 600; color: var(--picker-text); text-transform: uppercase; margin-right: 5px; }
         .picker-separator { width: 1px; height: clamp(15px, 3vw, 20px); background-color: var(--empty-color); }
 
@@ -49,29 +49,28 @@
         }
         .color-dot:hover { transform: scale(1.2); }
 
-        /* Stile per i nuovi pulsanti + e - */
         .action-btn {
             background-color: var(--page-bg); color: var(--th-text); border: 1px solid var(--border-color);
-            border-radius: 8px; padding: 4px 8px; font-family: 'Poppins', sans-serif;
-            font-size: clamp(10px, 1.5vw, 12px); font-weight: 600; cursor: pointer;
+            border-radius: 8px; padding: clamp(2px, 0.5vw, 4px) clamp(4px, 1vw, 8px); font-family: 'Poppins', sans-serif;
+            font-size: clamp(9px, 1.2vw, 12px); font-weight: 600; cursor: pointer;
             transition: all 0.2s ease; display: flex; align-items: center; gap: 4px;
         }
         .action-btn:hover { background-color: var(--th-bg); transform: translateY(-1px); box-shadow: 0 2px 5px rgba(0,0,0,0.05); }
 
-        /* Contenitore per permettere lo scorrimento se ci sono troppe colonne */
-        .table-wrapper { width: 100%; max-width: 1000px; overflow-x: auto; padding-bottom: 10px; }
+        .table-wrapper { width: 100%; max-width: 1000px; overflow-x: auto; padding-bottom: 5px; }
 
-        table { width: 100%; border-collapse: separate; border-spacing: clamp(3px, 1vw, 6px); table-layout: fixed; min-width: 500px; }
+        /* Resizable? Prova */
+        table { width: 100%; border-collapse: separate; border-spacing: clamp(2px, 0.8vw, 6px); table-layout: fixed; }
 
         th, td {
-            padding: clamp(6px, 1.5vw, 15px) clamp(3px, 1vw, 10px); text-align: center;
-            border-radius: clamp(8px, 1.5vw, 12px); font-size: clamp(9px, 1.8vw, 15px);
+            padding: clamp(4px, 1vw, 15px) clamp(2px, 0.5vw, 10px); text-align: center;
+            border-radius: clamp(6px, 1.2vw, 12px); font-size: clamp(8px, 1.5vw, 15px);
             transition: background-color 0.4s ease, border-color 0.4s ease, color 0.4s ease;
             word-wrap: break-word; outline: none; cursor: text;
         }
 
-        th { background-color: var(--th-bg); color: var(--th-text); font-weight: 600; text-transform: uppercase; font-size: clamp(8px, 1.5vw, 13px); }
-        td { background-color: var(--cell-bg); border: 1px solid var(--border-color); height: clamp(35px, 6vw, 50px); }
+        th { background-color: var(--th-bg); color: var(--th-text); font-weight: 600; text-transform: uppercase; font-size: clamp(7px, 1.2vw, 13px); }
+        td { background-color: var(--cell-bg); border: 1px solid var(--border-color); height: clamp(30px, 5vw, 50px); }
         .time-col { background-color: var(--time-bg); font-weight: 500; color: var(--th-text); }
         
         td:focus, th:focus { background-color: var(--cell-focus); border-color: var(--th-text); box-shadow: 0 4px 10px rgba(0,0,0,0.05); transform: translateY(-1px); }
@@ -111,7 +110,6 @@
     </div>
 
     <script>
-        // --- 1. GESTIONE TEMI ---
         function setBaseTheme(theme) {
             document.documentElement.setAttribute('data-theme', theme);
             localStorage.setItem('tt-theme', theme);
@@ -130,8 +128,6 @@
             dot.addEventListener('click', () => setAccentColor(dot.getAttribute('data-color-target')));
         });
 
-        // --- 2. GESTIONE GRIGLIA DINAMICA ---
-        // Recupera quante righe/colonne avevi salvato (Default: 5 righe, 6 colonne totali)
         let numRows = parseInt(localStorage.getItem('tt-rows')) || 5;
         let numCols = parseInt(localStorage.getItem('tt-cols')) || 6;
 
@@ -143,26 +139,23 @@
             tHead.innerHTML = '';
             tBody.innerHTML = '';
 
-            // Disegna Intestazione (Giorni)
             const headRow = document.createElement('tr');
             for (let c = 0; c < numCols; c++) {
                 const th = document.createElement('th');
                 th.contentEditable = "true";
                 th.id = `head-${c}`;
-                // Recupera il nome salvato, o usa quello di default
                 th.innerText = localStorage.getItem(th.id) || defaultHeaders[c] || `Giorno ${c}`;
                 th.addEventListener('input', () => localStorage.setItem(th.id, th.innerText));
                 headRow.appendChild(th);
             }
             tHead.appendChild(headRow);
 
-            // Disegna Righe e Celle
             for (let r = 0; r < numRows; r++) {
                 const tr = document.createElement('tr');
                 for (let c = 0; c < numCols; c++) {
                     const td = document.createElement('td');
                     td.contentEditable = "true";
-                    td.id = `cell-${r}-${c}`; 
+                    td.id = `cell-${r}-${c}`;
                     if (c === 0) td.classList.add('time-col');
                     
                     td.innerText = localStorage.getItem(td.id) || '';
@@ -173,21 +166,19 @@
             }
         }
 
-        // Funzione per i pulsanti + e -
         window.updateGrid = function(type, amount) {
             if (type === 'row') {
                 numRows += amount;
-                if (numRows < 1) numRows = 1; // Minimo 1 riga
+                if (numRows < 1) numRows = 1;
                 localStorage.setItem('tt-rows', numRows);
             } else if (type === 'col') {
                 numCols += amount;
-                if (numCols < 2) numCols = 2; // Minimo 2 colonne (orario + 1 giorno)
+                if (numCols < 2) numCols = 2;
                 localStorage.setItem('tt-cols', numCols);
             }
-            buildTable(); // Ridisegna la tabella aggiornata
+            buildTable();
         }
 
-        // Costruisco la tabella appena la pagina si carica
         buildTable();
     </script>
 
