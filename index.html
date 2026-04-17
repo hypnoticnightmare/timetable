@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="darkreader-lock">
     <meta name="color-scheme" content="light">
-    <title>Aesthetic Timetable - Rich Text & Colors</title>
+    <title>Aesthetic Timetable</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
         
-        /* Scudo aggiuntivo per i colori */
         :root, html, body {
             forced-color-adjust: none !important;
             -webkit-print-color-adjust: exact !important;
@@ -23,23 +22,14 @@
             --th-bg: #F2EBE9; --th-text: #8C7A74; --border-color: #E6DCD9; --time-bg: #FAF4F2;
         }
 
-        /* --- TEMI DI SFONDO --- */
         [data-theme="light"] { --page-bg: #FFFFFF; --cell-bg: #FCFAFA; --cell-focus: #FFFFFF; --text-color: #5c5552; --empty-color: #D4C5C1; --picker-bg: rgba(255, 255, 255, 0.8); --picker-text: #8C7A74; }
-        
-        /* TEMA BEIGE AGGIORNATO: Ora è il Giallino Caldo di Notion! */
         [data-theme="beige"] { 
-            --page-bg: #FFFBE6; 
-            --cell-bg: #FFF4D4; 
-            --cell-focus: #FFFBE6; 
-            --text-color: #5A504B; 
-            --empty-color: #DCD1B4; 
-            --picker-bg: rgba(255, 244, 212, 0.8); 
-            --picker-text: #8C7A74; 
+            --page-bg: #FFFBE6; --cell-bg: #FFF4D4; --cell-focus: #FFFBE6; 
+            --text-color: #5A504B; --empty-color: #DCD1B4; 
+            --picker-bg: rgba(255, 244, 212, 0.8); --picker-text: #8C7A74; 
         }
-        
         [data-theme="dark"] { --page-bg: #191919; --cell-bg: #252525; --cell-focus: #2A2A2A; --text-color: #D4D4D4; --empty-color: #555555; --picker-bg: rgba(44, 44, 44, 0.8); --picker-text: #A3A3A3; }
 
-        /* --- TEMI COLORI TABELLA --- */
         [data-color="default"] { --th-bg: #F2EBE9; --th-text: #8C7A74; --border-color: #E6DCD9; --time-bg: #FAF4F2; }
         [data-color="pink"] { --th-bg: #FCE4EC; --th-text: #880E4F; --border-color: #F8BBD0; --time-bg: #FAEAEE; }
         [data-color="blue"] { --th-bg: #E3F2FD; --th-text: #0D47A1; --border-color: #BBDEFB; --time-bg: #EBF4FA; }
@@ -61,7 +51,6 @@
         }
 
         .picker-group { display: flex; gap: clamp(4px, 1vw, 10px); align-items: center; }
-        .picker-label { font-size: clamp(8px, 1.5vw, 12px); font-weight: 600; color: var(--picker-text); text-transform: uppercase; margin-right: 5px; }
         .picker-separator { width: 1px; height: clamp(15px, 3vw, 20px); background-color: var(--empty-color); }
 
         .color-dot {
@@ -113,7 +102,6 @@
         .floating-toolbar button:hover { background: #4B4B4B; }
         .toolbar-divider { width: 1px; height: 16px; background: #555; margin: 0 4px; }
 
-        /* Stili per i selettori di colore personalizzati */
         .color-tool {
             display: flex; align-items: center; gap: 4px; padding: 2px 6px;
             background: transparent; border-radius: 4px; cursor: pointer;
@@ -138,6 +126,7 @@
             <div class="color-dot" style="background-color: #191919; border-color: #333;" data-theme-target="dark" title="Scuro"></div>
         </div>
         <div class="picker-separator"></div>
+        
         <div class="picker-group">
             <div class="color-dot" style="background-color: #D4C5C1;" data-color-target="default"></div>
             <div class="color-dot" style="background-color: #F8BBD0;" data-color-target="pink"></div>
@@ -146,11 +135,19 @@
             <div class="color-dot" style="background-color: #C8E6C9;" data-color-target="green"></div>
         </div>
         <div class="picker-separator"></div>
+        
         <div class="picker-group">
             <button class="action-btn" onclick="updateGrid('col', -1)">- Col</button>
             <button class="action-btn" onclick="updateGrid('col', 1)">+ Col</button>
             <button class="action-btn" onclick="updateGrid('row', -1)">- Riga</button>
             <button class="action-btn" onclick="updateGrid('row', 1)">+ Riga</button>
+        </div>
+        <div class="picker-separator"></div>
+        
+        <div class="picker-group">
+            <button class="action-btn" onclick="exportBackup()" title="Scarica un backup dei dati">💾 Salva</button>
+            <button class="action-btn" onclick="document.getElementById('import-file').click()" title="Carica un backup precedente">📂 Carica</button>
+            <input type="file" id="import-file" accept=".json" style="display: none;" onchange="importBackup(event)">
         </div>
     </div>
 
@@ -172,7 +169,6 @@
             <span>A</span>
             <input type="color" id="textColorPicker" class="color-picker" value="#000000">
         </label>
-        
         <label class="color-tool" title="Colore Evidenziatore">
             <span>🖍️</span>
             <input type="color" id="bgColorPicker" class="color-picker" value="#ffeb3b">
@@ -186,12 +182,10 @@
         // --- WRAPPER ANTI-CRASH PER LA MEMORIA ---
         const safeStorage = {
             get: function(key) {
-                try { return localStorage.getItem(key); } 
-                catch(e) { return null; }
+                try { return localStorage.getItem(key); } catch(e) { return null; }
             },
             set: function(key, val) {
-                try { localStorage.setItem(key, val); } 
-                catch(e) { console.warn("Salvataggio locale bloccato dal browser."); }
+                try { localStorage.setItem(key, val); } catch(e) { console.warn("Salvataggio locale bloccato."); }
             }
         };
 
@@ -214,7 +208,7 @@
             dot.addEventListener('click', () => setAccentColor(dot.getAttribute('data-color-target')));
         });
 
-        // --- GESTIONE TABELLA ---
+        // --- GESTIONE TABELLA E DIMENSIONI ---
         let numRows = parseInt(safeStorage.get('tt-rows')) || 5;
         let numCols = parseInt(safeStorage.get('tt-cols')) || 6;
 
@@ -267,6 +261,73 @@
         }
 
         buildTable();
+
+        // --- SISTEMA DI SALVATAGGIO / CARICAMENTO (BACKUP) ---
+        function exportBackup() {
+            // Raccoglie tutti i dati correnti
+            const backupData = {
+                theme: safeStorage.get('tt-theme') || 'light',
+                color: safeStorage.get('tt-color') || 'default',
+                rows: numRows,
+                cols: numCols,
+                cells: {}
+            };
+            
+            // Salva le intestazioni
+            for(let c=0; c<numCols; c++) {
+                backupData.cells[`head-${c}`] = safeStorage.get(`head-${c}`) || '';
+            }
+            // Salva le celle del corpo
+            for(let r=0; r<numRows; r++) {
+                for(let c=0; c<numCols; c++) {
+                    backupData.cells[`cell-${r}-${c}`] = safeStorage.get(`cell-${r}-${c}`) || '';
+                }
+            }
+            
+            // Crea il file JSON e attiva il download
+            const blob = new Blob([JSON.stringify(backupData)], {type: 'application/json'});
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'timetable_backup.json';
+            a.click();
+            URL.revokeObjectURL(url);
+        }
+
+        function importBackup(event) {
+            const file = event.target.files[0];
+            if(!file) return;
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                try {
+                    const data = JSON.parse(e.target.result);
+                    
+                    // Ripristina stili visivi
+                    if(data.theme) setBaseTheme(data.theme);
+                    if(data.color) setAccentColor(data.color);
+                    
+                    // Ripristina dimensioni
+                    if(data.rows) { numRows = data.rows; safeStorage.set('tt-rows', numRows); }
+                    if(data.cols) { numCols = data.cols; safeStorage.set('tt-cols', numCols); }
+                    
+                    // Ripristina contenuto celle
+                    if(data.cells) {
+                        for(let key in data.cells) {
+                            safeStorage.set(key, data.cells[key]);
+                        }
+                    }
+                    
+                    // Ricostruisci la tabella per applicare le modifiche
+                    buildTable();
+                    alert("Backup caricato con successo!");
+                } catch(err) {
+                    alert("Errore nel caricamento del file. Assicurati che sia un file di backup valido.");
+                }
+            };
+            reader.readAsText(file);
+            event.target.value = ''; // Reset per permettere un nuovo caricamento
+        }
 
         // --- LOGICA DELLA BARRA DI FORMATTAZIONE E COLOR PICKER ---
         const toolbar = document.getElementById('floating-toolbar');
