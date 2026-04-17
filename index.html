@@ -5,10 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="darkreader-lock">
     <meta name="color-scheme" content="light">
-    <title>Aesthetic Timetable - Rich Text</title>
+    <title>Aesthetic Timetable - Rich Text & Colors</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap');
         
+        /* Scudo aggiuntivo per i colori */
         :root, html, body {
             forced-color-adjust: none !important;
             -webkit-print-color-adjust: exact !important;
@@ -90,6 +91,7 @@
             gap: 5px; align-items: center;
         }
         .floating-toolbar.active { display: flex; }
+        
         .floating-toolbar button {
             background: transparent; border: none; color: white; cursor: pointer;
             font-size: 14px; padding: 4px 8px; border-radius: 4px; font-family: 'Poppins', sans-serif;
@@ -97,6 +99,20 @@
         }
         .floating-toolbar button:hover { background: #4B4B4B; }
         .toolbar-divider { width: 1px; height: 16px; background: #555; margin: 0 4px; }
+
+        /* Stili per i selettori di colore personalizzati */
+        .color-tool {
+            display: flex; align-items: center; gap: 4px; padding: 2px 6px;
+            background: transparent; border-radius: 4px; cursor: pointer;
+            color: white; font-family: 'Poppins', sans-serif; font-size: 14px; font-weight: 600;
+        }
+        .color-tool:hover { background: #4B4B4B; }
+        .color-picker {
+            border: none; width: 22px; height: 22px; padding: 0; 
+            background: transparent; cursor: pointer; border-radius: 4px;
+        }
+        .color-picker::-webkit-color-swatch-wrapper { padding: 0; }
+        .color-picker::-webkit-color-swatch { border: 1px solid #777; border-radius: 4px; }
 
     </style>
 </head>
@@ -133,16 +149,28 @@
     </div>
 
     <div id="floating-toolbar" class="floating-toolbar">
-        <button onmousedown="event.preventDefault(); formatText('bold')"><b>B</b></button>
-        <button onmousedown="event.preventDefault(); formatText('italic')"><i>I</i></button>
-        <button onmousedown="event.preventDefault(); formatText('underline')"><u>U</u></button>
+        <button onmousedown="event.preventDefault(); formatText('bold')" title="Grassetto"><b>B</b></button>
+        <button onmousedown="event.preventDefault(); formatText('italic')" title="Corsivo"><i>I</i></button>
+        <button onmousedown="event.preventDefault(); formatText('underline')" title="Sottolineato"><u>U</u></button>
+        
         <div class="toolbar-divider"></div>
-        <button onmousedown="event.preventDefault(); formatText('backColor', '#ffeb3b')">🖍️</button>
-        <button onmousedown="event.preventDefault(); formatText('removeFormat')">✕</button>
+        
+        <label class="color-tool" title="Colore Testo">
+            <span>A</span>
+            <input type="color" id="textColorPicker" class="color-picker" value="#000000">
+        </label>
+        
+        <label class="color-tool" title="Colore Evidenziatore">
+            <span>🖍️</span>
+            <input type="color" id="bgColorPicker" class="color-picker" value="#ffeb3b">
+        </label>
+
+        <div class="toolbar-divider"></div>
+        <button onmousedown="event.preventDefault(); formatText('removeFormat')" title="Rimuovi Formattazione">✕</button>
     </div>
 
     <script>
-        // --- WRAPPER ANTI-CRASH PER LA MEMORIA (SALVAGENTE) ---
+        // --- WRAPPER ANTI-CRASH PER LA MEMORIA ---
         const safeStorage = {
             get: function(key) {
                 try { return localStorage.getItem(key); } 
@@ -227,11 +255,42 @@
 
         buildTable();
 
-        // --- LOGICA DELLA BARRA DI FORMATTAZIONE FLUTTUANTE ---
+        // --- LOGICA DELLA BARRA DI FORMATTAZIONE E COLOR PICKER ---
         const toolbar = document.getElementById('floating-toolbar');
+        const textColorPicker = document.getElementById('textColorPicker');
+        const bgColorPicker = document.getElementById('bgColorPicker');
+        
+        let savedRange = null;
+        let isInteractingWithToolbar = false;
+
+        // Impedisce alla barra di scomparire mentre si sceglie il colore
+        toolbar.addEventListener('mousedown', () => isInteractingWithToolbar = true);
+        document.addEventListener('mouseup', () => {
+            setTimeout(() => isInteractingWithToolbar = false, 200);
+        });
+
+        // Applica i colori scelti
+        textColorPicker.addEventListener('input', (e) => { applyColor('foreColor', e.target.value); });
+        bgColorPicker.addEventListener('input', (e) => { applyColor('backColor', e.target.value); });
+
+        function applyColor(command, colorValue) {
+            if (savedRange) {
+                // Ripristina la selezione del testo per non perderla
+                const selection = window.getSelection();
+                selection.removeAllRanges();
+                selection.addRange(savedRange);
+                
+                document.execCommand(command, false, colorValue);
+                saveActiveCell();
+            }
+        }
 
         function formatText(command, value = null) {
             document.execCommand(command, false, value);
+            saveActiveCell();
+        }
+
+        function saveActiveCell() {
             const activeCell = document.activeElement;
             if (activeCell && activeCell.hasAttribute('contenteditable')) {
                 safeStorage.set(activeCell.id, activeCell.innerHTML);
@@ -239,6 +298,8 @@
         }
 
         document.addEventListener('selectionchange', () => {
+            if (isInteractingWithToolbar) return; // Non nascondere se l'utente sta usando i bottoni/colori
+
             const selection = window.getSelection();
             
             if (selection.toString().trim().length > 0 && selection.rangeCount > 0) {
@@ -247,6 +308,7 @@
                 if (container.nodeType === 3) { container = container.parentElement; }
                 
                 if (container && container.closest && container.closest('th, td')) {
+                    savedRange = range; // Salva la posizione per i color picker
                     const rect = range.getBoundingClientRect();
                     
                     toolbar.style.display = 'flex';
@@ -261,6 +323,7 @@
             toolbar.classList.remove('active');
             toolbar.style.display = 'none';
         });
+
     </script>
 </body>
 </html>
